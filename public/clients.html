@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clientes — ADM Saúde ERP</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/index.html" class="sidebar-logo" title="ADM Saúde ERP">
+        <img src="/assets/logo-adm-saude.png" alt="ADM Saúde">
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/index.html" class="sidebar-item">
+        <span class="icon">📋</span> Tarefas
+      </a>
+      <div class="sidebar-section-title">Sistema</div>
+      <a href="/clients.html" class="sidebar-item active">
+        <span class="icon">💼</span> Clientes
+      </a>
+      <a href="/users.html" class="sidebar-item" id="usersLink" style="display:none">
+        <span class="icon">👥</span> Usuários
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="userAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="userName">—</div>
+          <div class="sidebar-user-role" id="userRole">—</div>
+        </div>
+      </div>
+      <button class="sidebar-logout" onclick="logout()">⎋ Sair</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="app-header">
+      <div class="header-left">
+        <h1 class="header-title">Gerenciador de Clientes</h1>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary btn-sm" onclick="openClientModal()">＋ Novo Cliente</button>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div id="clientsList"></div>
+    </div>
+  </main>
+</div>
+
+<!-- CLIENT MODAL -->
+<div class="modal-overlay" id="clientModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h2 class="modal-title" id="clientModalTitle">Novo Cliente</h2>
+      <button class="modal-close" onclick="closeClientModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editClientId">
+      <div class="form-group">
+        <label>Nome da Empresa / Clínica *</label>
+        <input type="text" class="form-input" id="editClientName" placeholder="Ex: Clínica Alpha" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Sigla *</label>
+          <input type="text" class="form-input" id="editClientInitials" placeholder="Ex: ALP" maxlength="4" required>
+        </div>
+        <div class="form-group">
+          <label>Cor do Avatar</label>
+          <input type="color" class="form-input" id="editClientColor" value="#1389c7" style="height:42px;padding:4px">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeClientModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveClient()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-overlay" id="confirmModal">
+  <div class="confirm-box">
+    <h3 class="confirm-title" id="confirmTitle">Confirmar Ação</h3>
+    <p class="confirm-message" id="confirmMessage">Você tem certeza que deseja realizar esta operação?</p>
+    <div class="confirm-buttons">
+      <button class="btn btn-secondary btn-sm" id="confirmCancelBtn">Cancelar</button>
+      <button class="btn btn-danger btn-sm" id="confirmOkBtn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/clients.js"></script>
+</body>
+</html>

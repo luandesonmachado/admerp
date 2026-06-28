@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — ADM Saúde ERP</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="login-page">
+  <div class="login-bg-circle"></div>
+  <div class="login-bg-circle"></div>
+  <div class="login-bg-circle"></div>
+
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="/assets/logo-adm-saude.png" alt="ADM Saúde">
+    </div>
+    <h1 class="login-title">Bem-vindo de volta</h1>
+    <p class="login-subtitle">Acesse o gerenciador de tarefas</p>
+
+    <div class="login-error" id="loginError"></div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="username">Usuário</label>
+        <input type="text" id="username" class="form-input" placeholder="Digite seu usuário" autocomplete="username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input type="password" id="password" class="form-input" placeholder="Digite sua senha" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
+        Entrar
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // If already logged in, redirect
+  if (localStorage.getItem('adm_token')) {
+    window.location.href = '/index.html';
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    const errorEl = document.getElementById('loginError');
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Entrando...';
+    errorEl.classList.remove('show');
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error);
+
+      localStorage.setItem('adm_token', data.token);
+      localStorage.setItem('adm_user', JSON.stringify(data.user));
+      window.location.href = '/index.html';
+    } catch (err) {
+      errorEl.textContent = err.message || 'Erro ao fazer login';
+      errorEl.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+    }
+  });
+</script>
+</body>
+</html>

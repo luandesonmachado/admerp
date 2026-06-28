@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarefas — ADM Saúde ERP</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/index.html" class="sidebar-logo" title="ADM Saúde ERP">
+        <img src="/assets/logo-adm-saude.png" alt="ADM Saúde">
+      </a>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebarNav">
+      <button class="sidebar-item active" data-client="all" onclick="selectClient('all')">
+        <span class="icon">📋</span> Visão Geral <span class="badge" id="badgeAll">0</span>
+      </button>
+
+      <div class="sidebar-section-title">Clientes</div>
+      <div id="clientsList"></div>
+
+      <button class="sidebar-item" onclick="openClientModal()" style="margin-top:0.5rem;color:var(--blue-light)">
+        <span class="icon">＋</span> Novo Cliente
+      </button>
+
+      <div class="sidebar-section-title">Sistema</div>
+      <a href="/clients.html" class="sidebar-item" id="clientsLink">
+        <span class="icon">💼</span> Clientes
+      </a>
+      <a href="/users.html" class="sidebar-item" id="usersLink" style="display:none">
+        <span class="icon">👥</span> Usuários
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="userAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="userName">—</div>
+          <div class="sidebar-user-role" id="userRole">—</div>
+        </div>
+      </div>
+      <button class="sidebar-logout" onclick="logout()">⎋ Sair</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <h1 class="header-title" id="pageTitle">Visão Geral</h1>
+        <span class="header-client-badge" id="pageBadge" style="display:none"></span>
+      </div>
+      <div class="header-right">
+        <div class="view-toggle">
+          <button class="view-toggle-btn active" data-view="kanban" onclick="switchView('kanban')">▦ Kanban</button>
+          <button class="view-toggle-btn" data-view="calendar" onclick="switchView('calendar')">📅 Calendário</button>
+          <button class="view-toggle-btn" data-view="list" onclick="switchView('list')">☰ Lista</button>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="toggleFilters()" id="filterToggle">⚙ Filtros</button>
+        <button class="btn btn-primary btn-sm" onclick="openTaskModal()">＋ Nova Tarefa</button>
+      </div>
+    </header>
+
+    <!-- Filters -->
+    <div class="filter-bar hidden" id="filterBar">
+      <span class="filter-label">Filtrar por:</span>
+      <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+        <option value="">Status</option>
+        <option value="todo">A Fazer</option>
+        <option value="in_progress">Em Andamento</option>
+        <option value="review">Em Revisão</option>
+        <option value="done">Concluído</option>
+      </select>
+      <select class="filter-select" id="filterPriority" onchange="applyFilters()">
+        <option value="">Prioridade</option>
+        <option value="high">🔴 Alta</option>
+        <option value="medium">🟡 Média</option>
+        <option value="low">🟢 Baixa</option>
+      </select>
+      <select class="filter-select" id="filterAssigned" onchange="applyFilters()">
+        <option value="">Responsável</option>
+      </select>
+      <select class="filter-select" id="filterProject" onchange="applyFilters()">
+        <option value="">Projeto</option>
+      </select>
+      <input type="date" class="filter-input" id="filterDueFrom" onchange="applyFilters()" title="Prazo de">
+      <input type="date" class="filter-input" id="filterDueTo" onchange="applyFilters()" title="Prazo até">
+      <button class="filter-clear" onclick="clearFilters()">Limpar filtros</button>
+    </div>
+
+    <!-- Content -->
+    <div class="content-area" id="contentArea">
+      <!-- Rendered by JS -->
+    </div>
+  </main>
+</div>
+
+<!-- TASK MODAL -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="taskModalTitle">Nova Tarefa</h2>
+      <button class="modal-close" onclick="closeTaskModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="taskId">
+      <div class="form-group">
+        <label>Título *</label>
+        <input type="text" class="form-input" id="taskTitle" placeholder="Ex: Apuração IRPJ trimestral" required>
+      </div>
+      <div class="form-group">
+        <label>Descrição</label>
+        <textarea class="form-input" id="taskDesc" placeholder="Detalhes da tarefa..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Cliente *</label>
+          <select class="form-input" id="taskClient"></select>
+        </div>
+        <div class="form-group">
+          <label>Projeto</label>
+          <input type="text" class="form-input" id="taskProject" placeholder="Ex: Assessoria Fiscal">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Status</label>
+          <select class="form-input" id="taskStatus">
+            <option value="todo">A Fazer</option>
+            <option value="in_progress">Em Andamento</option>
+            <option value="review">Em Revisão</option>
+            <option value="done">Concluído</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Prioridade</label>
+          <select class="form-input" id="taskPriority">
+            <option value="medium">🟡 Média</option>
+            <option value="high">🔴 Alta</option>
+            <option value="low">🟢 Baixa</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Prazo</label>
+          <input type="date" class="form-input" id="taskDue">
+        </div>
+        <div class="form-group">
+          <label>Responsável</label>
+          <select class="form-input" id="taskAssigned">
+            <option value="">Nenhum</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="taskDeleteBtn" onclick="deleteTask()" style="display:none">Excluir</button>
+      <button class="btn btn-secondary" onclick="closeTaskModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTask()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT MODAL -->
+<div class="modal-overlay" id="clientModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h2 class="modal-title">Novo Cliente</h2>
+      <button class="modal-close" onclick="closeClientModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nome da Empresa *</label>
+        <input type="text" class="form-input" id="clientName" placeholder="Ex: Clínica ABC">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Sigla *</label>
+          <input type="text" class="form-input" id="clientInitials" placeholder="Ex: ABC" maxlength="4">
+        </div>
+        <div class="form-group">
+          <label>Cor</label>
+          <input type="color" class="form-input" id="clientColor" value="#1389c7" style="height:42px;padding:4px">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeClientModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveClient()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-overlay" id="confirmModal">
+  <div class="confirm-box">
+    <h3 class="confirm-title" id="confirmTitle">Confirmar Ação</h3>
+    <p class="confirm-message" id="confirmMessage">Você tem certeza que deseja realizar esta operação?</p>
+    <div class="confirm-buttons">
+      <button class="btn btn-secondary btn-sm" id="confirmCancelBtn">Cancelar</button>
+      <button class="btn btn-danger btn-sm" id="confirmOkBtn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/kanban.js"></script>
+<script src="/js/calendar.js"></script>
+<script src="/js/list.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>
